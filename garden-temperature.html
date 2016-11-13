@@ -1,0 +1,97 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`garden-temperature`
+Garden IoT for Temp
+
+@demo demo/index.html
+-->
+
+<dom-module id="garden-temperature">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]</h2>
+    <svg id="gardentemperature"></svg>
+  </template>
+  <script src="../d3/d3.min.js"></script>
+  <!-- Bower doesn't bundle these for some reason -->
+  <!-- <script src="https://d3js.org/d3-color.v0.5.min.js"></script> -->
+  <!-- <script src="https://d3js.org/d3-interpolate.v0.9.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v0.3.min.js"></script> -->
+
+  <script>
+    Polymer({
+
+      is: 'garden-temperature',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'garden-temperature'
+        }
+      },
+
+      createElements: function() {
+        var width = 350;
+        var height = 350;
+
+        this.svg = d3.select(this.$.gardentemperature)
+          .attr( "width", width )
+          .attr( "height", height );
+
+        this.arc = d3.arc()
+          .innerRadius(60)
+          .outerRadius(120)
+          .cornerRadius(1)
+          .padAngle(0);
+
+        this.color = ["#2776d7", "#fee08b", "#d73027"];
+      },
+      drawChart: function () {
+        var self = this;
+        var gauge = self.makeGaugeData();
+        var temp = self.getData();
+
+        self.pie = d3.pie()
+          .startAngle( -(3 * Math.PI) / 4 )
+          .endAngle( (3 * Math.PI) / 4 )
+          .value(d => d);
+
+        self.arcs = self.svg.selectAll( '.arc' )
+          .data(self.pie(gauge)) // pass arc data
+          .enter()
+          .append('path')
+          .attr("d", self.arc)
+          .attr("transform", "translate(200,200)")
+          .style("fill", (d, i) => self.color[i]);
+
+        self.needle = self.svg.selectAll(".needle")
+          .data(temp)
+          .enter()
+          .append('line')
+          .attr("x1", 0)
+          .attr("x2", -115)
+          .attr("y1", 0)
+          .attr("y2", 0)
+          .style("stroke", "black")
+          .attr( "transform", d => ` translate(200,200) rotate(${180 * d / gauge[2]})`);
+      },
+      makeGaugeData: function() {
+        return [0.2, 0.8, 0.2];
+      },
+      getData: function() {
+        return[d3.randomUniform(0, 1)()];
+      },
+      ready: function () {
+        this.createElements();
+        this.drawChart();
+        // this.getData();
+      },
+
+    });
+  </script>
+</dom-module>
