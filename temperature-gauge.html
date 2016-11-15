@@ -1,22 +1,22 @@
 <link rel='import' href='../polymer/polymer.html'>
 
 <!--
-`garden-temperature`
-# Temperature gauge
+`temperature-gauge`
+## Temperature gauge
 
-## Reusable element for Grow IoT
+Reusable temperature element
 
-### Dependencies
+#### Dependencies
 
 - [d3](https://github.com/d3/d3)
 
-### Caveats
+#### Caveats
 Only works with Fahrenheit for now
 
 @demo demo/index.html
 -->
 
-<dom-module id='garden-temperature'>
+<dom-module id='temperature-gauge'>
   <template>
     <style>
       :host {
@@ -24,7 +24,7 @@ Only works with Fahrenheit for now
       }
     </style>
     <h2>Temperature Gauge Element</h2>
-    <svg id='gardentemperature'>
+    <svg id='temperaturegauge'>
       <defs>
         <linearGradient id='temp-gradient' x1='0%' y1='0%' x2='100%' y2='0%'>
           <stop offset='0%' style='stop-color:[[colorCold]];stop-opacity:1' />
@@ -35,15 +35,10 @@ Only works with Fahrenheit for now
     </svg>
   </template>
   <script src='../d3/d3.js'></script>
-  <!-- Bower doesn't bundle these for some reason -->
-  <!-- <script src='https://d3js.org/d3-color.v0.5.min.js'></script> -->
-  <!-- <script src='https://d3js.org/d3-interpolate.v0.9.min.js'></script>
-  <script src='https://d3js.org/d3-scale-chromatic.v0.3.min.js'></script> -->
-
   <script>
     Polymer({
 
-      is: 'garden-temperature',
+      is: 'temperature-gauge',
 
       properties: {
         /**
@@ -125,7 +120,7 @@ Only works with Fahrenheit for now
         const RANGE = [-45, 225];
 
         // SVG Container attributes
-        this.svg = d3.select(this.$.gardentemperature)
+        this.svg = d3.select(this.$.temperaturegauge)
           .attr('width', this.chartWidth)
           .attr('height', this.chartHeight);
 

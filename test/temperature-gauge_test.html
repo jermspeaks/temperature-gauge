@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
 
-    <title>garden-temperature test</title>
+    <title>temperature-gauge test</title>
 
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <script src="../../web-component-tester/browser.js"></script>
@@ -14,7 +14,7 @@
   <body>
     <test-fixture id="basic">
       <template>
-        <garden-temperature></garden-temperature>
+        <temperature-gauge></temperature-gauge>
       </template>
     </test-fixture>
 
@@ -22,7 +22,7 @@
       suite('garden-temperature', function() {
         test('instantiating the element works', function() {
           var element = fixture('basic');
-          assert.equal(element.is, 'garden-temperature');
+          assert.equal(element.is, 'temperature-gauge');
         });
       });
     </script>

@@ -1,7 +1,7 @@
 {
-  "name": "garden-temperature",
-  "description": "Garden IoT for Temp",
-  "main": "garden-temperature.html",
+  "name": "temperature-gauge",
+  "description": "Temperature gauge chart",
+  "main": "temperature-gauge.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0"
   },

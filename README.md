@@ -1,6 +1,6 @@
-# \<garden-temperature\>
+# \<temperature-gauge\>
 
-Garden IoT for Temp
+Temperature gauge made with d3
 
 ## Install the Polymer-CLI
 
