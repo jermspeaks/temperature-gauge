@@ -2,7 +2,13 @@
 
 <!--
 `garden-temperature`
-Garden IoT for Temp
+# Temperature gauge
+
+## Reusable element for Grow IoT
+
+### Dependencies
+
+- d3
 
 @demo demo/index.html
 -->
@@ -29,6 +35,9 @@ Garden IoT for Temp
       is: 'garden-temperature',
 
       properties: {
+        /**
+         * The markdown source that should be rendered by this element.
+         */
         name: {
           type: String,
           value: 'garden-temperature'
@@ -38,7 +47,9 @@ Garden IoT for Temp
           value: 65
         }
       },
-
+      /**
+       * Create elements for charts
+       */
       createElements: function() {
         var width = 350;
         var height = 350;
@@ -60,6 +71,9 @@ Garden IoT for Temp
 
         this.tempScale = d3.scaleLinear().domain([0, 100]).range([-45, 225]);
       },
+      /**
+       * Draws the chart
+       */
       drawChart: function () {
         var self = this;
         var gauge = self.makeGaugeData();
@@ -116,12 +130,32 @@ Garden IoT for Temp
           .attr("transform", d => "translate(175, 200)")
           .text(() => parseFloat(temp, 10).toFixed(0).toString() + '°F');
       },
-      makeGaugeData: function(N = 10) {
-        return Array.apply(null, { length: N }).map(Number.call, Number).map(() => 1);
+      /**
+       * Creates Gauge Data
+       * @param  {Number} N   Number of splits in gauge
+       * @return {array}      Array of numbers as value equal to 1
+       */
+      makeGaugeData: function(N) {
+        var elements;
+        if (N) {
+          elements = N;
+        } else {
+          elements = 10;
+        }
+
+        return Array.apply(null, { length: elements }).map(Number.call, Number).map(() => 1);
       },
-      // makeTicks: function() {
-      //   return Array.apply(null, { length: 10 }).map(Number.call, Number).map(num => (num + 1) * 10);
-      // },
+      /**
+       * Creates list for ticks
+       * @return {array} list of temperatures for tick marks
+       */
+      makeTicks: function() {
+        return Array.apply(null, { length: 10 }).map(Number.call, Number).map(num => (num + 1) * 10);
+      },
+      /**
+       * Gets data from properties and places it in an array
+       * @return {array} Tempature Data in a list
+       */
       getData: function() {
         // This is the getter for the data
         return [this.temperature];
