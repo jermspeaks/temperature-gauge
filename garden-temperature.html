@@ -1,4 +1,4 @@
-<link rel="import" href="../polymer/polymer.html">
+<link rel='import' href='../polymer/polymer.html'>
 
 <!--
 `garden-temperature`
@@ -8,34 +8,37 @@
 
 ### Dependencies
 
-- d3
+- [d3](https://github.com/d3/d3)
+
+### Caveats
+Only works with Fahrenheit for now
 
 @demo demo/index.html
 -->
 
-<dom-module id="garden-temperature">
+<dom-module id='garden-temperature'>
   <template>
     <style>
       :host {
         display: block;
       }
     </style>
-    <h2>Hello [[name]]</h2>
-    <svg id="gardentemperature">
+    <h2>Temperature Gauge Element</h2>
+    <svg id='gardentemperature'>
       <defs>
-        <linearGradient id="temp-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:#7dace7;stop-opacity:1" />
-          <stop offset="50%" style="stop-color:#fff;stop-opacity:0" />
-          <stop offset="100%" style="stop-color:#e7827d;stop-opacity:1" />
+        <linearGradient id='temp-gradient' x1='0%' y1='0%' x2='100%' y2='0%'>
+          <stop offset='0%' style='stop-color:[[colorCold]];stop-opacity:1' />
+          <stop offset='50%' style='stop-color:#fff;stop-opacity:0' />
+          <stop offset='100%' style='stop-color:[[colorHot]];stop-opacity:1' />
         </linearGradient>
       </defs>
     </svg>
   </template>
-  <script src="../d3/d3.min.js"></script>
+  <script src='../d3/d3.js'></script>
   <!-- Bower doesn't bundle these for some reason -->
-  <!-- <script src="https://d3js.org/d3-color.v0.5.min.js"></script> -->
-  <!-- <script src="https://d3js.org/d3-interpolate.v0.9.min.js"></script>
-  <script src="https://d3js.org/d3-scale-chromatic.v0.3.min.js"></script> -->
+  <!-- <script src='https://d3js.org/d3-color.v0.5.min.js'></script> -->
+  <!-- <script src='https://d3js.org/d3-interpolate.v0.9.min.js'></script>
+  <script src='https://d3js.org/d3-scale-chromatic.v0.3.min.js'></script> -->
 
   <script>
     Polymer({
@@ -44,50 +47,100 @@
 
       properties: {
         /**
-         * The markdown source that should be rendered by this element.
+         * Temperature for gauge.
+         *
+         * **Note** If temperature is less than 0°F,
+         * the needle will move beyond the gauge.
+         * Likewise for above 1000°F
          */
-        name: {
-          type: String,
-          value: 'garden-temperature'
-        },
         temperature: {
           type: Number,
           value: 65
+        },
+        /**
+         * Width of SVG container
+         */
+        chartWidth: {
+          type: Number,
+          value: 300
+        },
+        /**
+         * Height of SVG container
+         */
+        chartHeight: {
+          type: Number,
+          value: 300
+        },
+        /**
+         * Size of the inner radius of the gauge
+         */
+        innerRadius: {
+          type: Number,
+          value: 60
+        },
+        /**
+         * Size of the outer radius of the gauge
+         */
+        outerRadius: {
+          type: Number,
+          value: 120
+        },
+        /**
+         * Center of the gauge on the X-Axis
+         */
+        chartXCenter: {
+          type: Number,
+          value: 150
+        },
+        /**
+         * Center of the gauge on the Y-Axis
+         */
+        chartYCenter: {
+          type: Number,
+          value: 150
+        },
+        /**
+         * Color for the left side of linear gradient
+         */
+        colorCold: {
+          type: String,
+          value: '#7dace7'
+        },
+        /**
+         * Color for the right side of linear gradient
+         */
+        colorHot: {
+          type: String,
+          value: '#e7827d'
         }
       },
       /**
        * Create elements for charts
        */
       createElements: function() {
-        this.WIDTH = 350;
-        this.HEIGHT = 350;
-        this.INNER_RADIUS = 60;
-        this.OUTER_RADIUS = 120;
-        this.CORNER_RADIUS = 1;
-        this.PAD_ANGLE = 0;
-        this.DOMAIN = [0, 100];
-        this.RANGE = [-45, 225];
+        // Chart Constants
+        const CORNER_RADIUS = 1;
+        const PAD_ANGLE = 0;
+        const DOMAIN = [0, 100];
+        const RANGE = [-45, 225];
 
+        // SVG Container attributes
         this.svg = d3.select(this.$.gardentemperature)
-          .attr( "width", this.WIDTH )
-          .attr( "height", this.HEIGHT );
+          .attr('width', this.chartWidth)
+          .attr('height', this.chartHeight);
 
         this.arc = d3.arc()
-          .innerRadius(this.INNER_RADIUS)
-          .outerRadius(this.OUTER_RADIUS)
-          .cornerRadius(this.CORNER_RADIUS)
-          .padAngle(this.PAD_ANGLE);
-
-        this.tickLine = d3.radialLine()
-          .radius(this.OUTER_RADIUS)
-          .angle(d => -d + Math.PI / 2);
+          .innerRadius(this.innerRadius)
+          .outerRadius(this.outerRadius)
+          .cornerRadius(CORNER_RADIUS)
+          .padAngle(PAD_ANGLE);
 
         this.textArc = d3.arc()
-          .outerRadius(this.OUTER_RADIUS);
+          .outerRadius(this.outerRadius);
 
-        this.color = ["#2776d7", "#7dace7", "#e9f1fb", "#fff", "#fbeae9", "#e7827d", "#d73027"];
+        this.chartCenter = `translate(${this.chartXCenter},${this.chartYCenter})`;
 
-        this.tempScale = d3.scaleLinear().domain(this.DOMAIN).range(this.RANGE);
+        this.tempScale = d3.scaleLinear().domain(DOMAIN).range(RANGE);
       },
       /**
        * Draws the chart
@@ -104,64 +157,64 @@
           .value(d => d);
 
         self.groupArcs = self.svg.append('g')
-          .attr("class", "arcs-group");
+          .attr('class', 'arcs-group');
 
         self.arcs = self.groupArcs.selectAll( '.arc' )
-          .data(self.pie([1])) // pass arc data
+          .data(self.pie([1])) // Create only one arc
           .enter()
           .append('path')
-          .attr("transform", "translate(200,200)")
-          .attr("d", self.arc)
-          .attr("stroke", "#000")
-          .attr("stroke-width", "1px")
-          .style("fill", "url(#temp-gradient)");
+          .attr('transform', self.chartCenter)
+          .attr('d', self.arc)
+          .attr('stroke', '#000')
+          .attr('stroke-width', '1px')
+          .style('fill', 'url(#temp-gradient)');
 
-        self.groupTicks = self.svg.append("g")
-          .attr("class", "ticks-group")
-          .selectAll("g")
+        self.groupTicks = self.svg.append('g')
+          .attr('class', 'ticks-group')
+          .selectAll('g')
           .data(d3.range(-45, 245, 27))
           .enter()
-          .append("g")
-          .attr("transform", d => "translate(200, 200) rotate(" + -d + ")");
+          .append('g')
+          .attr('transform', d => `${self.chartCenter} rotate(${-d})`);
 
-        self.groupTicks.append("text")
-          .attr("x", self.OUTER_RADIUS + 6)
-          .attr("dy", ".35em")
-          .style("text-anchor", d => d < 270 && d > 90 ? "end" : null)
-          .attr("transform", d => {
+        self.groupTicks.append('text')
+          .attr('x', self.outerRadius + 6)
+          .attr('dy', '.35em')
+          .style('text-anchor', d => d < 270 && d > 90 ? 'end' : null)
+          .attr('transform', d => {
             if (d < 270 && d > 90) {
-              return "rotate(180 " + (self.OUTER_RADIUS + 6) + ",0)";
+              return 'rotate(180 ' + (self.outerRadius + 6) + ',0)';
             } else {
               return null;
             }
           })
-          .text((d, i) => ((11 - (i + 1)) * 10) + "°F");
+          .text((d, i) => ((11 - (i + 1)) * 10) + '°F');
 
-        self.groupTicks.append("line")
-          .attr("x1", self.INNER_RADIUS)
-          .attr("x2", self.OUTER_RADIUS)
-          .attr("y1", 0)
-          .attr("y2", 0)
+        self.groupTicks.append('line')
+          .attr('x1', self.innerRadius)
+          .attr('x2', self.outerRadius)
+          .attr('y1', 0)
+          .attr('y2', 0)
           .style('fill', 'none')
           .style('stroke', '#777')
           .style('stroke-dasharray', '1,4');
 
-        self.needle = self.svg.selectAll(".needle")
+        self.needle = self.svg.selectAll('.needle')
           .data(temp)
           .enter()
           .append('line')
-          .attr("x1", 0)
-          .attr("x2", -115)
-          .attr("y1", 0)
-          .attr("y2", 0)
-          .style("stroke", "black")
-          .attr("transform", d => `translate(200,200) rotate(${this.tempScale(d)})`);
+          .attr('x1', 0)
+          .attr('x2', -115)
+          .attr('y1', 0)
+          .attr('y2', 0)
+          .style('stroke', 'black')
+          .attr('transform', d => `${self.chartCenter} rotate(${self.tempScale(d)})`);
 
         self.tempText = self.svg.append('text')
           .attr('class', 'temp-text')
           .style('font-size', '32px')
-          .attr("transform", d => "translate(200, 280)")
-          .attr("text-anchor", "middle")
+          .attr('transform', d => `translate(${self.chartXCenter},${self.chartYCenter + self.innerRadius})`)
+          .attr('text-anchor', 'middle')
           .text(() => parseFloat(temp, 10).toFixed(0).toString() + '°F');
       },
       /**
