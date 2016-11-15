@@ -46,11 +46,24 @@ Only works with Fahrenheit for now
          *
          * **Note** If temperature is less than 0°F,
          * the needle will move beyond the gauge.
-         * Likewise for above 1000°F
+         * Likewise for above 100°F
          */
         temperature: {
           type: Number,
           value: 65
+        },
+        /**
+         * Temperature unit
+         *
+         * **Note** Type: enum
+         * Possible values: ['F', 'C']
+         *
+         * **TODO** Needs to be implemented
+         */
+        unit: {
+          type: String,
+          value: 'F',
+          observer: '_enumUnit'
         },
         /**
          * Width of SVG container
@@ -110,6 +123,19 @@ Only works with Fahrenheit for now
         }
       },
       /**
+       * Temperature unit change
+       * @param  {string} a New value passed in
+       * @param  {string} b Old value
+       * @return {string}   Unit for Temperature
+       */
+      _enumUnit: function(a, b) {
+        var validUnits = ['F', 'C'];
+        if (validUnits.indexOf(a) === -1) {
+          // Do not change unit
+          this.unit = b;
+        }
+      },
+      /**
        * Create elements for charts
        */
       createElements: function() {
@@ -142,9 +168,7 @@ Only works with Fahrenheit for now
        */
       drawChart: function () {
         var self = this;
-        var gauge = self.makeGaugeData();
         var temp = self.getData();
-        var ticks = self.makeTicks();
 
         self.pie = d3.pie()
           .startAngle( -(3 * Math.PI) / 4 )
@@ -211,28 +235,6 @@ Only works with Fahrenheit for now
           .attr('transform', d => `translate(${self.chartXCenter},${self.chartYCenter + self.innerRadius})`)
           .attr('text-anchor', 'middle')
           .text(() => parseFloat(temp, 10).toFixed(0).toString() + '°F');
-      },
-      /**
-       * Creates Gauge Data
-       * @param  {Number} N   Number of splits in gauge
-       * @return {array}      Array of numbers as value equal to 1
-       */
-      makeGaugeData: function(N) {
-        var elements;
-        if (N) {
-          elements = N;
-        } else {
-          elements = 10;
-        }
-
-        return Array.apply(null, { length: elements }).map(Number.call, Number).map(() => 1);
-      },
-      /**
-       * Creates list for ticks
-       * @return {array} list of temperatures for tick marks
-       */
-      makeTicks: function() {
-        return Array.apply(null, { length: 10 }).map(Number.call, Number).map(num => (num + 1) * 10);
       },
       /**
        * Gets data from properties and places it in an array
