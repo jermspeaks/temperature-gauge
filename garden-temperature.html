@@ -127,7 +127,7 @@
         self.tempText = self.svg.append('text')
           .attr('class', 'temp-text')
           .style('font-size', '32px')
-          .attr("transform", d => "translate(175, 200)")
+          .attr("transform", d => "translate(170, 280)")
           .text(() => parseFloat(temp, 10).toFixed(0).toString() + '°F');
       },
       /**
