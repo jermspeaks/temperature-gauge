@@ -201,7 +201,7 @@ Only works with Fahrenheit for now
         if (this.unit === 'F') {
           DOMAIN = [0, 100];
         } else {
-          DOMAIN = [this.fToC(0), this.fToC(100)];
+          DOMAIN = [this._fToC(0), this._fToC(100)];
         }
 
         // SVG Container attributes
@@ -282,7 +282,7 @@ Only works with Fahrenheit for now
             if (self.unit === 'F') {
               return ((11 - (i + 1)) * 10) + '°F';
             } else {
-              return self.fToC((11 - (i + 1)) * 10).toFixed(0) + '°C';
+              return self._fToC((11 - (i + 1)) * 10).toFixed(0) + '°C';
             }
           });
 
@@ -342,10 +342,20 @@ Only works with Fahrenheit for now
       _degToRad: function(deg) {
         return deg * Math.PI / 180;
       },
-      fToC: function(f) {
+      /**
+       * Converts Fahrenheit to Celsius
+       * @param  {number} f Fahrenheit
+       * @return {number}   Celsius
+       */
+      _fToC: function(f) {
         return (f - 32) / 1.8;
       },
-      cToF: function(c) {
+      /**
+       * Converts Celsius to Fahrenheit
+       * @param  {number} C Celsius
+       * @return {number}   Fahrenheit
+       */
+      _cToF: function(c) {
         return (1.8 * c) + 32;
       },
       /**
