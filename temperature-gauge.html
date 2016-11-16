@@ -23,7 +23,6 @@ Only works with Fahrenheit for now
         display: block;
       }
     </style>
-    <h2>Temperature Gauge Element</h2>
     <svg id='temperaturegauge'>
       <defs>
         <linearGradient id='temp-gradient' x1='0%' y1='0%' x2='100%' y2='0%'>
@@ -120,7 +119,35 @@ Only works with Fahrenheit for now
         colorHot: {
           type: String,
           value: '#e7827d'
-        }
+        },
+        /**
+         * Minimum Temperature
+         */
+        minTemp: {
+          type: Number,
+          value: 0
+        },
+        /**
+         * Maximum Temperature
+         */
+        maxTemp: {
+          type: Number,
+          value: 1000
+        },
+        /**
+         * Length of needle
+         */
+        needleLength: {
+          type: Number,
+          value: 125
+        },
+        /**
+         * Needle base radius
+         */
+        needleBaseRadius: {
+          type: Number,
+          value: 5
+        },
       },
       /**
        * Temperature unit change
@@ -175,6 +202,14 @@ Only works with Fahrenheit for now
           .endAngle( (3 * Math.PI) / 4 )
           .value(d => d);
 
+        self.circle = self.svg.append('circle')
+          .attr('cx', this.chartXCenter)
+          .attr('cy', this.chartYCenter)
+          .attr('r', this.outerRadius)
+          .attr('fill', 'none')
+          .attr('stroke-width', '2px')
+          .attr('stroke', '#000');
+
         self.groupArcs = self.svg.append('g')
           .attr('class', 'arcs-group');
 
@@ -218,16 +253,21 @@ Only works with Fahrenheit for now
           .style('stroke', '#777')
           .style('stroke-dasharray', '1,4');
 
-        self.needle = self.svg.selectAll('.needle')
+        self.needleGroup = self.svg.selectAll('.needle-group')
           .data(temp)
           .enter()
-          .append('line')
-          .attr('x1', 0)
-          .attr('x2', -115)
-          .attr('y1', 0)
-          .attr('y2', 0)
-          .style('stroke', 'black')
-          .attr('transform', d => `${self.chartCenter} rotate(${self.tempScale(d)})`);
+          .append('g');
+
+        self.needleGroup.append('circle')
+          .attr('cx', self.chartXCenter)
+          .attr('cy', self.chartYCenter)
+          .attr('r', '5')
+          .attr('fill', '#000');
+
+        self.needleGroup.append('path')
+          .attr('class', 'needle')
+          .attr('d', d => self._calculatePointerPath(d))
+          .attr('fill', '#000');
 
         self.tempText = self.svg.append('text')
           .attr('class', 'temp-text')
@@ -235,6 +275,30 @@ Only works with Fahrenheit for now
           .attr('transform', d => `translate(${self.chartXCenter},${self.chartYCenter + self.innerRadius})`)
           .attr('text-anchor', 'middle')
           .text(() => parseFloat(temp, 10).toFixed(0).toString() + '°F');
+      },
+      /**
+       * Calculaters pointer path
+       * @param  {number} temperature      Temperature
+       * @return {string}                  Path of pointer
+       */
+     _calculatePointerPath: function(temperature) {
+        const THETA_RAD = this._degToRad(this.tempScale(temperature));
+        var topX = this.chartXCenter - this.needleLength * Math.cos(THETA_RAD);
+        var topY = this.chartYCenter - this.needleLength * Math.sin(THETA_RAD);
+        var leftX = this.chartXCenter - this.needleBaseRadius * Math.cos(THETA_RAD - Math.PI / 2);
+        var leftY = this.chartYCenter - this.needleBaseRadius * Math.sin(THETA_RAD - Math.PI / 2);
+        var rightX = this.chartXCenter - this.needleBaseRadius * Math.cos(THETA_RAD + Math.PI / 2);
+        var rightY = this.chartYCenter - this.needleBaseRadius * Math.sin(THETA_RAD + Math.PI / 2);
+
+        return `M ${leftX} ${leftY} L ${topX} ${topY} L ${rightX} ${rightY}`;
+      },
+      /**
+       * Utility function :: Converts Degrees to Radians
+       * @param  {number} deg Degrees
+       * @return {number}     Radians
+       */
+      _degToRad: function(deg) {
+        return deg * Math.PI / 180;
       },
       /**
        * Gets data from properties and places it in an array
