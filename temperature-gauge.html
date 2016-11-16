@@ -69,21 +69,21 @@ Only works with Fahrenheit for now
          */
         chartWidth: {
           type: Number,
-          value: 300
+          value: 350
         },
         /**
          * Height of SVG container
          */
         chartHeight: {
           type: Number,
-          value: 300
+          value: 350
         },
         /**
          * Size of the inner radius of the gauge
          */
         innerRadius: {
           type: Number,
-          value: 60
+          value: 90
         },
         /**
          * Size of the outer radius of the gauge
@@ -97,14 +97,14 @@ Only works with Fahrenheit for now
          */
         chartXCenter: {
           type: Number,
-          value: 150
+          value: 175
         },
         /**
          * Center of the gauge on the Y-Axis
          */
         chartYCenter: {
           type: Number,
-          value: 150
+          value: 175
         },
         /**
          * Color for the left side of linear gradient
@@ -139,7 +139,7 @@ Only works with Fahrenheit for now
          */
         needleLength: {
           type: Number,
-          value: 125
+          value: 115
         },
         /**
          * Needle base radius
@@ -148,6 +148,35 @@ Only works with Fahrenheit for now
           type: Number,
           value: 5
         },
+        /**
+         * Enable outer ring
+         */
+        useOuterRing: {
+          type: Boolean,
+          value: false
+        },
+        /**
+         * Width of outer ring
+         */
+        outerRingStrokeWidth: {
+          type: Number,
+          value: 2
+        },
+        /**
+         * Color of outer ring
+         * @type {Object}
+         */
+        outerRingColor: {
+          type: String,
+          value: '#00'
+        },
+        /**
+         * Tick text padding from gauge arc
+         */
+        tickTextPadding: {
+          type: Number,
+          value: 6
+        }
       },
       /**
        * Temperature unit change
@@ -202,14 +231,18 @@ Only works with Fahrenheit for now
           .endAngle( (3 * Math.PI) / 4 )
           .value(d => d);
 
-        self.circle = self.svg.append('circle')
-          .attr('cx', this.chartXCenter)
-          .attr('cy', this.chartYCenter)
-          .attr('r', this.outerRadius)
-          .attr('fill', 'none')
-          .attr('stroke-width', '2px')
-          .attr('stroke', '#000');
+        // Draw an outer ring
+        if (self.useOuterRing) {
+          self.circle = self.svg.append('circle')
+            .attr('cx', self.chartXCenter)
+            .attr('cy', self.chartYCenter)
+            .attr('r', self.outerRadius)
+            .attr('fill', 'none')
+            .attr('stroke-width', `${self.outerRingStrokeWidth}px`)
+            .attr('stroke', self.outerRingColor);
+        }
 
+        // Create main gauge arc
         self.groupArcs = self.svg.append('g')
           .attr('class', 'arcs-group');
 
@@ -232,7 +265,7 @@ Only works with Fahrenheit for now
           .attr('transform', d => `${self.chartCenter} rotate(${-d})`);
 
         self.groupTicks.append('text')
-          .attr('x', self.outerRadius + 6)
+          .attr('dx', self.outerRadius + self.tickTextPadding)
           .attr('dy', '.35em')
           .style('text-anchor', d => d < 270 && d > 90 ? 'end' : null)
           .attr('transform', d => {
