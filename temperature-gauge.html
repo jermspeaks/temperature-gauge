@@ -40,7 +40,7 @@ Only works with Fahrenheit for now
       value="{{temperature::input}}"
     />
   </template>
-  <script src='../d3/d3.js'></script>
+  <script src='../d3/d3.min.js'></script>
   <script>
     Polymer({
 
@@ -56,7 +56,7 @@ Only works with Fahrenheit for now
          */
         temperature: {
           type: String,
-          value: '68',
+          value: '12',
           observer: 'handleTempChange'
         },
         /**
@@ -67,7 +67,7 @@ Only works with Fahrenheit for now
          */
         unit: {
           type: String,
-          value: 'F',
+          value: 'C',
           observer: '_enumUnit'
         },
         /**
@@ -131,14 +131,14 @@ Only works with Fahrenheit for now
          */
         minTemp: {
           type: Number,
-          value: 0
+          value: 0 // Default for F
         },
         /**
          * Maximum Temperature
          */
         maxTemp: {
           type: Number,
-          value: 100
+          value: 100 // Default for F
         },
         /**
          * Length of needle
@@ -205,12 +205,14 @@ Only works with Fahrenheit for now
         const CORNER_RADIUS = 1;
         const PAD_ANGLE = 0;
         const RANGE = [-45, 225];
-        var DOMAIN; // really is a constant
-        if (this.unit === 'F') {
-          DOMAIN = [0, 100];
-        } else {
-          DOMAIN = [this._fToC(0), this._fToC(100)];
+
+        // Change min and max temp if Celsius
+        if (this.unit === 'C') {
+          this.minTemp = this._fToC(0);
+          this.maxTemp = this._fToC(100);
         }
+
+        const DOMAIN = [this.minTemp, this.maxTemp];
 
         // SVG Container attributes
         this.svg = d3.select(this.$.temperaturegauge)
